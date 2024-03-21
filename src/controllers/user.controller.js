@@ -17,6 +17,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //* return response
 
   const { username, email, fullName, password } = req.body;
+  // console.log(req.body);
   //? Validation
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -27,15 +28,24 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(501, "Invalid Email");
   }
   //? Check if user already exists
-  const existingUser = User.findOne({
+  const existingUser = await User.findOne({
     $or: [{ email }, { username }],
   });
   if (existingUser) {
     throw new ApiError(409, "User with Email or Username already exists");
   }
+  // console.log(req.files);
   //? Check for images
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  //! const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
   //? Check Avatar Image
   if (!avatarLocalPath) {
     throw new ApiError(400, "Please upload an avatar image");
