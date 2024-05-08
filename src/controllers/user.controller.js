@@ -287,6 +287,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while Uploading on Avatar");
   }
 
+  //delete old image
+  if (user.avatar) {
+    const publicId = user.avatar.split("/").slice(-1)[0].split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
+  }
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -313,6 +319,12 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   if (!cover.url) {
     throw new ApiError(400, "Error while Uploading on Cover Image");
+  }
+
+  //delete old image
+  if (user.coverImage) {
+    const publicId = user.coverImage.split("/").slice(-1)[0].split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
   }
 
   const user = await User.findByIdAndUpdate(
